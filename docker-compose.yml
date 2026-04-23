@@ -1,0 +1,9 @@
+services:
+  wuxing-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wuxing-clothing
+    ports:
+      - "8080:80"
+    restart: unless-stopped
