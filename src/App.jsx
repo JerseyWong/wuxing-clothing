@@ -39,22 +39,26 @@ const DAYEL_LABEL = {
   '木':'木日 · 寅卯木','火':'火日 · 巳午火','土':'土日 · 辰戌丑未','金':'金日 · 申酉金','水':'水日 · 子亥水',
 };
 
+const LD_CN = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+  '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+  '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+
 const WD = ['日','一','二','三','四','五','六'];
+
+// Intl 实际输出的月份名：正、二、三、四、五、六、七、八、九、十、十一、十二
 const LUNAR_MONTH_MAP = {
-  '正': 1, '一': 1,
-  '二': 2,
-  '三': 3,
-  '四': 4,
-  '五': 5,
-  '六': 6,
-  '七': 7,
-  '八': 8,
-  '九': 9,
-  '十': 10,
+  '正':  1,
+  '二':  2,
+  '三':  3,
+  '四':  4,
+  '五':  5,
+  '六':  6,
+  '七':  7,
+  '八':  8,
+  '九':  9,
+  '十':  10,
   '十一': 11,
-  '冬': 11,
   '十二': 12,
-  '腊': 12,
 };
 
 function buildSafeDate(year, month, day) {
@@ -66,11 +70,7 @@ function parseLunarMonth(monthText) {
   const cleaned = monthText.replace(/^闰/, '').replace(/月$/, '');
   const lm = LUNAR_MONTH_MAP[cleaned];
   if (!lm) return null;
-  return {
-    lm,
-    isLeap,
-    displayMonth: `${isLeap ? '闰' : ''}${cleaned}`,
-  };
+  return { lm, isLeap, displayMonth: `${isLeap ? '闰' : ''}${cleaned}` };
 }
 
 function toLunar(year, month, day) {
@@ -86,9 +86,9 @@ function toLunar(year, month, day) {
 
     const parts = formatter.formatToParts(date);
     const relatedYear = parts.find(p => p.type === 'relatedYear')?.value;
-    const yearName = parts.find(p => p.type === 'yearName')?.value;
-    const monthText = parts.find(p => p.type === 'month')?.value;
-    const dayText = parts.find(p => p.type === 'day')?.value;
+    const yearName    = parts.find(p => p.type === 'yearName')?.value;
+    const monthText   = parts.find(p => p.type === 'month')?.value;
+    const dayText     = parts.find(p => p.type === 'day')?.value;
 
     if (!relatedYear || !yearName || !monthText || !dayText) return null;
 
@@ -109,7 +109,7 @@ function toLunar(year, month, day) {
   }
 }
 
-// 日柱计算（JDN 法，按公历日期）
+// 日柱计算（JDN 法）
 function jdn(y, m, d) {
   const a = Math.floor((14 - m) / 12);
   const yr = y + 4800 - a;
@@ -120,12 +120,11 @@ function jdn(y, m, d) {
 function getSB(y, m, d) {
   const j = jdn(y, m, d);
   return {
-    stem: STEMS[((j + 9) % 10 + 10) % 10],
+    stem:   STEMS[((j + 9) % 10 + 10) % 10],
     branch: BRANCHES[((j + 1) % 12 + 12) % 12],
   };
 }
 
-// 展开更多颜色组件
 function MoreColors({ el, mainColor }) {
   const [open, setOpen] = useState(false);
   const ed = EL[el];
@@ -210,15 +209,16 @@ function Pentagon({ dayEl }) {
 
 export default function App() {
   const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
+  const [year,  setYear]  = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const [day, setDay] = useState(now.getDate());
+  const [day,   setDay]   = useState(now.getDate());
 
   const maxDay = new Date(year, month, 0).getDate();
 
+  // 修复1：依赖数组只保留 maxDay，避免 day 变化时多余触发
   useEffect(() => {
     if (day > maxDay) setDay(maxDay);
-  }, [day, maxDay]);
+  }, [maxDay]);
 
   const { sb, dayEl, lunar, wday } = useMemo(() => {
     const dd = Math.min(day, maxDay);
@@ -261,7 +261,7 @@ export default function App() {
           </div>
           <div style={{display:'flex',gap:'8px'}}>
             <select value={year} onChange={e => setYear(+e.target.value)} style={{...sel,flex:2}}>
-              {Array.from({length:80}, (_, i) => 2020 + i).map(yr => <option key={yr} value={yr}>{yr}年</option>)}
+              {Array.from({length:130}, (_, i) => 1970 + i).map(yr => <option key={yr} value={yr}>{yr}年</option>)}
             </select>
             <select value={month} onChange={e => setMonth(+e.target.value)} style={{...sel,flex:1.5}}>
               {Array.from({length:12}, (_, i) => i + 1).map(mo => <option key={mo} value={mo}>{mo}月</option>)}
@@ -280,7 +280,7 @@ export default function App() {
                 {lunar.yearName}年
               </div>
               <div style={{fontSize:'18px',fontWeight:600,color:'#3d2000',letterSpacing:'2px',marginBottom:'14px'}}>
-                农历 {lunar.monthLabel}月{lunar.ld <= 30 ? ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'][lunar.ld - 1] : lunar.ld}
+                农历 {lunar.monthLabel}月{LD_CN[lunar.ld - 1] ?? lunar.ld}
               </div>
               <div style={{display:'inline-flex',alignItems:'center',gap:'10px',padding:'10px 28px',borderRadius:'50px',background:eld.bg,border:`2px solid ${eld.main}44`}}>
                 <span style={{fontSize:'12px',color:'#666'}}>日支五行</span>
