@@ -62,7 +62,17 @@ function getSB(y, m, d) {
 
 ### 农历转换
 
-使用经典 `lunarInfo` 十六进制数据表（覆盖 1900-2100 年），动态计算闰月、月大小，准确转换公历日期为农历。
+使用浏览器原生 `Intl.DateTimeFormat('zh-Hans-u-ca-chinese')` 进行农历转换，无需任何数据表，零维护成本：
+
+```js
+const formatter = new Intl.DateTimeFormat('zh-Hans-u-ca-chinese', {
+  year: 'numeric', month: 'long', day: 'numeric',
+});
+const parts = formatter.formatToParts(date);
+// 直接获取 yearName（干支年）、month（农历月，含闰月前缀）、day（农历日）
+```
+
+**兼容性：** Chrome 79+ / Edge 79+ / Safari 14+ / Firefox 52+
 
 ---
 
@@ -80,8 +90,8 @@ function getSB(y, m, d) {
 
 ## 📅 支持范围
 
-- 公历年份：**2020 — 2099 年**
-- 农历数据：内置 `lunarInfo` 数据表，动态计算闰月，精确覆盖 1900-2100 年
+- 公历年份：**1970 — 2099 年**
+- 农历转换：浏览器原生 `Intl` API，理论上无年份限制
 
 ---
 
@@ -166,7 +176,7 @@ wuxing-clothing/
 - **框架**：React 18 + Vite 5
 - **样式**：纯 CSS-in-JS（无外部 UI 库）
 - **字体**：Google Fonts · Noto Serif SC
-- **农历**：lunarInfo 十六进制数据表（1900-2100）
+- **农历**：浏览器原生 `Intl.DateTimeFormat`（无第三方依赖）
 - **部署**：Docker + Nginx 多阶段构建，镜像体积约 20MB
 
 ---
