@@ -1,0 +1,12 @@
+{
+  "administrativeDataVersion": "2026.0.0",
+  "coordinateDataVersion": "2024.6.19",
+  "coordinateSystem": "WGS84",
+  "recordCount": 2849,
+  "precisionCounts": {
+    "county": 2841,
+    "county_name_match": 2,
+    "province": 2,
+    "city": 4
+  }
+}
